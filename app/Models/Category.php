@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable = ['name','slug','parent_id','status'];
+    protected $fillable = ['name','slug','type','parent_id','status'];
 
     public function parent()
     {
@@ -16,5 +16,16 @@ class Category extends Model
     public function children()
     {
         return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function getFullPathAttribute()
+    {
+    $path = $this->name;
+    $parent = $this->parent;
+    while ($parent) {
+        $path = $parent->name . ' → ' . $path;
+        $parent = $parent->parent;
+    }
+    return $path;
     }
 }

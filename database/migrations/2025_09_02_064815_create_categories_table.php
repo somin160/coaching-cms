@@ -10,17 +10,20 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('categories', function (Blueprint $table) {
-        $table->bigIncrements('id');
-        $table->string('name', 255);
-        $table->string('slug', 255)->unique();
-        $table->foreignId('parent_id')->nullable()
-            ->constrained('categories')->nullOnDelete();
-        $table->tinyInteger('status')->default(1);
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('categories', function (Blueprint $table) {
+            $table->id(); // shorthand for bigIncrements
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->foreignId('parent_id')
+                  ->nullable()
+                  ->constrained('categories')
+                  ->nullOnDelete();
+            $table->enum('type', ['Online', 'Offline', 'DLP'])->default('Online');
+            $table->tinyInteger('status')->default(1);
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.

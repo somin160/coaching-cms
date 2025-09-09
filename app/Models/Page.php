@@ -13,16 +13,18 @@ class Page extends Model
         'category_id',
         'meta_title',
         'meta_description',
+        'main_category_type',
         'sections',
         'status',
     ];
 
-    protected $casts = [
-        'sections' => 'array',
-    ];
+   protected $casts = [
+    'sections' => 'array',
+    'main_category_type' => 'string',
+];
+public function category()
+{
+    return $this->belongsTo(Category::class, 'category_id');
+}
 
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
 }

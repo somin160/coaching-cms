@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
+use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,62 +13,67 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\RichEditor;
+
 
 class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+
                 Select::make('page_type')
                     ->options([
-                        'Custom' => 'Custom',
+                        'Custom'   => 'Custom',
                         'Category' => 'Category',
-                        'Course' => 'Course',
+                        'Course'   => 'Course',
                     ])
-                    ->required(),
+                    ->required()
+                    ->reactive(),
 
                 TextInput::make('title')
                     ->required()
                     ->maxLength(255),
 
                 TextInput::make('slug')
-                    ->required()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->placeholder('Leave empty to auto-generate'),
 
                 Select::make('category_id')
-                    ->relationship('category', 'name')
+                    ->label('Category')
+                    ->options(function () {
+                        return Category::with('parent')->get()->mapWithKeys(function ($category) {
+                            $label = $category->parent
+                                ? $category->parent->name . ' -> ' . $category->name
+                                : $category->name;
+
+                            return [$category->id => strtoupper($category->type) . ' - ' . $label];
+                        });
+                    })
                     ->searchable()
-                    ->nullable(),
-
-                TextInput::make('meta_title')->maxLength(255),
-                Textarea::make('meta_description')->rows(3)->maxLength(500),
-
-                Toggle::make('status')->label('Active')->default(true),
-
+                    ->required(fn (callable $get) => $get('page_type') === 'Category')
+                    ->visible(fn ($get) => $get('page_type') === 'Category')
+                    ->default(fn ($record) => $record?->category_id ?? null)
+                    ->reactive(),
 
                 Repeater::make('sections')
                     ->label('Page Sections')
                     ->schema([
                         Select::make('section_type')
                             ->options([
-                                'HeroSection' => 'Hero Section',
-                                'TextWithImageGrid' => 'Text with Image Grid',
-                                'ImageGrid' => 'Image Grid',
-                                'Carousel' => 'Carousel',
-                                'FAQs' => 'FAQs',
-                                'TextEditor' => 'Text Editor',
+                                'HeroSection'      => 'Hero Section',
+                                'TextWithImages'   => 'Text / Image Grid', // Combined
+                                'Carousel'         => 'Carousel',
+                                'FAQs'             => 'FAQs',
+                                'TextEditor'       => 'Text Editor',
                             ])
                             ->required()
                             ->reactive(),
@@ -80,10 +86,11 @@ class PageResource extends Resource
                                         TextInput::make('subtitle'),
                                         FileUpload::make('background_image')->image(),
                                     ],
-                                    'FAQs' => [
+                                    'TextWithImages' => [
                                         Repeater::make('items')->schema([
-                                            TextInput::make('question')->required(),
-                                            Textarea::make('answer')->required(),
+                                            TextInput::make('title'),
+                                            Textarea::make('description'),
+                                            FileUpload::make('image')->image(),
                                         ]),
                                     ],
                                     'Carousel' => [
@@ -92,32 +99,31 @@ class PageResource extends Resource
                                             TextInput::make('caption'),
                                         ]),
                                     ],
-                                    'TextWithImageGrid' => [
+                                    'FAQs' => [
                                         Repeater::make('items')->schema([
-                                            TextInput::make('title')->required(),
-                                            Textarea::make('description'),
-                                            FileUpload::make('image')->image(),
-                                        ]),
-                                    ],
-                                    'ImageGrid' => [
-                                        Repeater::make('images')->schema([
-                                            FileUpload::make('image')->image()->required(),
+                                            TextInput::make('question')->required(),
+                                            Textarea::make('answer')->required(),
                                         ]),
                                     ],
                                     'TextEditor' => [
-                                        RichEditor::make('content')->required()
+                                       RichEditor::make('content')
+                                        ->label('Page Content')
                                         ->columnSpanFull()
+                                        ->fileAttachmentsDirectory('pages/content')
+                                        ->toolbarButtons([
+                                            'bold', 'italic', 'strike', 'link',
+                                            'bulletList', 'orderedList', 'blockquote', 'codeBlock', 'image', 'historyUndo', 'historyRedo',
+                                        ]),
                                     ],
-                                    default => [
-                                        KeyValue::make('custom_data')->label('Custom Data (JSON)'),
-                                    ],
+                                    default => [],
                                 };
                             }),
                     ])
-                    ->default([])
+                    ->default(fn ($record) => $record?->sections ?? [])
                     ->orderable()
                     ->collapsible()
                     ->columnSpanFull(),
+
             ]);
     }
 
@@ -128,8 +134,8 @@ class PageResource extends Resource
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('page_type'),
-                Tables\Columns\TextColumn::make('slug'),
-                Tables\Columns\TextColumn::make('category.name')->label('Category'),
+                Tables\Columns\TextColumn::make('category.type')->label('Main Category'),
+                Tables\Columns\TextColumn::make('category.name')->label('Sub Category'),
                 Tables\Columns\IconColumn::make('status')->boolean(),
                 Tables\Columns\TextColumn::make('created_at')->dateTime(),
             ]);
@@ -138,9 +144,9 @@ class PageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPages::route('/'),
+            'index'  => Pages\ListPages::route('/'),
             'create' => Pages\CreatePage::route('/create'),
-            'edit' => Pages\EditPage::route('/{record}/edit'),
+            'edit'   => Pages\EditPage::route('/{record}/edit'),
         ];
     }
 }
