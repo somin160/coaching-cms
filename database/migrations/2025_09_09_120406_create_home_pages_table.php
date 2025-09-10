@@ -9,15 +9,11 @@ return new class extends Migration {
         Schema::create('home_pages', function (Blueprint $table) {
             $table->id();
             $table->string('title')->nullable();
+
             $table->json('hero_slider')->nullable();
-            $table->json('courses')->nullable();
-            $table->json('rankers')->nullable();
-            $table->json('image_content')->nullable();
+            $table->json('img_with_content')->nullable();
             $table->json('videos')->nullable();
-            $table->json('img_grid')->nullable();
             $table->json('achievers')->nullable();
-            $table->json('testimonials')->nullable();
-            $table->json('faqs')->nullable();
             $table->timestamps();
         });
     }
@@ -26,4 +22,3 @@ return new class extends Migration {
         Schema::dropIfExists('home_pages');
     }
 };
-

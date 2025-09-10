@@ -2,161 +2,143 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\HomePageResource\Pages;
 use App\Models\HomePage;
-use Filament\Resources\Resource;
-use Filament\Resources\Form;
-use Filament\Resources\Table;
 use Filament\Forms;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class HomePageResource extends Resource
 {
     protected static ?string $model = HomePage::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-home';
+    protected static ?string $navigationLabel = 'Home Page';
 
-    // ====================
-    // Form Definition
-    // ====================
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                // Hero Banner Section
-                Repeater::make('hero_banners')
-                    ->label('Hero Banners')
+                Forms\Components\Section::make('Page Details')
                     ->schema([
-                        TextInput::make('title')->required(),
-                        Textarea::make('subtitle'),
-                        FileUpload::make('image')->image()->required(),
-                        TextInput::make('button_text'),
-                        TextInput::make('button_url'),
-                    ])
-                    ->columns(1)
-                    ->collapsible(),
+                        Forms\Components\TextInput::make('title')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                    ]),
 
-                // Courses Section
-                Repeater::make('courses')
-                    ->label('Courses by Category')
-                    ->relationship('categories')
-                    ->schema([
-                        TextInput::make('name')->required(),
-                        Textarea::make('description'),
-                        FileUpload::make('image')->image(),
-                        TextInput::make('button_text'),
-                        TextInput::make('button_url'),
-                    ])
-                    ->columns(2)
-                    ->collapsible(),
+                Forms\Components\Tabs::make('Home Page Sections')->tabs([
 
-                // Rankers Section
-                Repeater::make('rankers')
-                    ->label('Rankers')
-                    ->schema([
-                        TextInput::make('name')->required(),
-                        Textarea::make('description'),
-                        FileUpload::make('image')->image(),
-                    ])
-                    ->columns(2)
-                    ->collapsible(),
+                    // TAB 1: HERO SLIDER (with Toggle)
+                    Forms\Components\Tabs\Tab::make('Hero Slider')
+                        ->icon('heroicon-o-photo')
+                        ->schema([
+                            Forms\Components\Repeater::make('hero_slider')
+                                ->label('Slider Items')
+                                ->schema([
+                                    Forms\Components\FileUpload::make('image')->label('Slide Image')
+                                        ->image()->directory('hero-slider')->required(),
+                                    Forms\Components\TextInput::make('title')->label('Main Heading')->required(),
+                                    Forms\Components\Textarea::make('subtitle')->label('Sub-heading')->rows(2),
 
-                // Image + Content Section
-                Repeater::make('image_content_sections')
-                    ->label('Image + Content Sections')
-                    ->schema([
-                        FileUpload::make('image')->image()->required(),
-                        TextInput::make('title')->required(),
-                        Textarea::make('content'),
-                    ])
-                    ->columns(2)
-                    ->collapsible(),
+                                    // Toggle to decide where to show the slide
+                                    Forms\Components\Toggle::make('is_main_banner')
+                                        ->label('Show in Main Banner?')
+                                        ->helperText('ON = Top hero banner, OFF = Achievers section below')
+                                        ->default(false)
+                                        ->columnSpanFull(),
+                                ])
+                                ->columns(2)
+                                ->addActionLabel('Add New Slide'),
+                        ]),
 
-                // Video Slider Section
-                Repeater::make('videos')
-                    ->label('Video Slider')
-                    ->schema([
-                        TextInput::make('title')->required(),
-                        TextInput::make('video_url')->required(),
-                    ])
-                    ->columns(1)
-                    ->collapsible(),
+                    // TAB 2: WHY US SECTION (Image with Content)
+                    Forms\Components\Tabs\Tab::make('Why Us Section')
+                        ->icon('heroicon-o-sparkles')
+                        ->schema([
+                            Forms\Components\FileUpload::make('why_us_image')->label('Main Image')
+                                ->image()->directory('why-us'),
+                            Forms\Components\TextInput::make('why_us_title')->label('Section Title')->default('Why Career Point?'),
+                            Forms\Components\Repeater::make('why_us_points')
+                                ->label('Points')
+                                ->schema([
+                                    Forms\Components\TextInput::make('point')->required(),
+                                ])
+                                ->addActionLabel('Add Point'),
+                        ]),
 
-                // Image Grid Section
-                Repeater::make('image_grid')
-                    ->label('Image Grid')
-                    ->schema([
-                        FileUpload::make('image')->image()->required(),
-                        TextInput::make('title'),
-                    ])
-                    ->columns(3)
-                    ->collapsible(),
+                    // TAB 3: IMAGE GALLERY
+                    Forms\Components\Tabs\Tab::make('Image Gallery')
+                        ->icon('heroicon-o-squares-2x2')
+                        ->schema([
+                             Forms\Components\Repeater::make('image_grid')
+                                ->label('Gallery Images')
+                                ->schema([
+                                    Forms\Components\FileUpload::make('image')->label('Image')
+                                        ->image()->directory('image-grid')->required(),
+                                    Forms\Components\TextInput::make('caption')->label('Caption (Optional)'),
+                                ])
+                                ->addActionLabel('Add Image to Gallery'),
+                        ]),
 
-                // Achievers Section
-                Repeater::make('achievers')
-                    ->label('Achievers')
-                    ->schema([
-                        FileUpload::make('image')->image()->required(),
-                        TextInput::make('name')->required(),
-                        TextInput::make('description'),
-                    ])
-                    ->columns(3)
-                    ->collapsible(),
+                    // TAB 4: VIDEOS
+                    Forms\Components\Tabs\Tab::make('Videos')
+                        ->icon('heroicon-o-video-camera')
+                        ->schema([
+                            Forms\Components\Repeater::make('videos')
+                                ->schema([
+                                    Forms\Components\FileUpload::make('thumbnail')->label('Video Thumbnail')
+                                        ->image()->directory('video-thumbnails')->required(),
+                                    Forms\Components\TextInput::make('video_url')->label('YouTube/Vimeo URL')
+                                        ->url()->required(),
+                                    Forms\Components\TextInput::make('title')->label('Video Title'),
+                                ])
+                                ->addActionLabel('Add Video'),
+                        ]),
 
-                // Testimonials
-                Repeater::make('testimonials')
-                    ->label('Testimonials')
-                    ->schema([
-                        TextInput::make('name')->required(),
-                        Textarea::make('feedback')->required(),
-                        FileUpload::make('image')->image(),
-                    ])
-                    ->columns(1)
-                    ->collapsible(),
+                    // TAB 5: TESTIMONIALS
+                    Forms\Components\Tabs\Tab::make('Testimonials')
+                        ->icon('heroicon-o-chat-bubble-left-right')
+                        ->schema([
+                            Forms\Components\Repeater::make('testimonials')
+                                ->schema([
+                                    Forms\Components\FileUpload::make('avatar')->image()->directory('testimonials')->required(),
+                                    Forms\Components\TextInput::make('name')->required(),
+                                    Forms\Components\TextInput::make('designation')->required(),
+                                    Forms\Components\Textarea::make('quote')->required()->rows(4)->columnSpanFull(),
+                                ])
+                                ->columns(2)
+                                ->addActionLabel('Add Testimonial'),
+                        ]),
 
-                // FAQs
-                Repeater::make('faqs')
-                    ->label('FAQs')
-                    ->schema([
-                        TextInput::make('question')->required(),
-                        Textarea::make('answer')->required(),
-                    ])
-                    ->columns(1)
-                    ->collapsible(),
+                    // TAB 6: FAQS
+                    Forms\Components\Tabs\Tab::make('FAQs')
+                        ->icon('heroicon-o-question-mark-circle')
+                        ->schema([
+                            Forms\Components\Repeater::make('faqs')
+                                ->schema([
+                                    Forms\Components\TextInput::make('question')->required()->columnSpanFull(),
+                                    Forms\Components\RichEditor::make('answer')->required()->columnSpanFull(),
+                                ])
+                                ->addActionLabel('Add FAQ'),
+                        ]),
+
+                ])->columnSpanFull(),
             ]);
     }
 
-    // ====================
-    // Table Definition
-    // ====================
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('created_at')->dateTime(),
-                TextColumn::make('updated_at')->dateTime(),
+                Tables\Columns\TextColumn::make('title')->searchable()->weight('bold'),
+                Tables\Columns\TextColumn::make('updated_at')->dateTime('d M, Y')->sortable(),
             ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ->actions([Tables\Actions\EditAction::make()])
+            ->bulkActions([Tables\Actions\BulkActionGroup::make([Tables\Actions\DeleteBulkAction::make()])]);
     }
 
-    // ====================
-    // Pages
-    // ====================
     public static function getPages(): array
     {
         return [
@@ -164,5 +146,11 @@ class HomePageResource extends Resource
             'create' => Pages\CreateHomePage::route('/create'),
             'edit' => Pages\EditHomePage::route('/{record}/edit'),
         ];
+    }
+
+    public static function canCreate(): bool
+    {
+        // This ensures only one home page can be created
+        return !HomePage::exists();
     }
 }

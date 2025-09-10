@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,25 +12,15 @@ class HomePage extends Model
     protected $fillable = [
         'title',
         'hero_slider',
-        'courses',
-        'rankers',
-        'image_content',
+        'img_with_content',
         'videos',
-        'img_grid',
         'achievers',
-        'testimonials',
-        'faqs',
     ];
 
     protected $casts = [
         'hero_slider' => 'array',
-        'courses' => 'array',
-        'rankers' => 'array',
-        'image_content' => 'array',
+        'img_with_content' => 'array',
         'videos' => 'array',
-        'img_grid' => 'array',
         'achievers' => 'array',
-        'testimonials' => 'array',
-        'faqs' => 'array',
     ];
 }

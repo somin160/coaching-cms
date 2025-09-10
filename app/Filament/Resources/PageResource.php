@@ -17,6 +17,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\RichEditor;
+use Awcodes\FilamentTiptapEditor\TiptapEditor;
 
 
 class PageResource extends Resource
