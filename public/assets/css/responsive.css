@@ -1,0 +1,89 @@
+@media (min-width: 992px) {
+    /* .main-header .navbar .navbar-nav .dropdown-menu {
+        position: absolute;
+        display: block;
+        opacity: 0;
+        transition: all 0.5s;
+        transform: scale(1, 0);
+        transform-origin: top;
+    }
+    .main-header .navbar .navbar-nav .dropdown:hover .dropdown-menu {
+        position: absolute;
+        display: block;
+        opacity: 1;
+        transition: all 0.5s;
+        transform: scale(1, 1);
+        width: 200px;
+    }
+    .navbar-expand-lg {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+    } */
+}
+
+@media (max-width: 991px) {
+    a.navbar-brand {
+        max-width: 140px;
+    }
+  body  .top-right-content .btn-group {
+        display: block;
+    }
+    .contact_details {
+        padding-left: 0;
+    }
+    .inner_content_center{
+        display: block;
+    }
+    .btn.btn-info2.btn-sm {
+        margin: 2px;
+        padding: 3px 7px;
+        font-size: 12px;
+    
+        text-decoration: none;
+    }
+    div#navbarSupportedContent {
+        position: absolute;
+        left: 0;
+        right: .0;
+        background-color: var(--rdx-primary);
+        width: 94%;
+        margin: 0 auto;
+        top: 49px;
+        border-top: 1px solid #ccc;
+    }
+    .page_hero_content h1 {
+        font-size: 40px;
+        line-height: 1.2;
+    }
+    .contact__form {
+        margin-top: 30px;
+    }
+    .page_course_details_content h1 {
+        font-size: 38px;
+        line-height: 1.3;
+        color: var(--rdx-primary);
+    }
+    .page_course_details_content {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 767px) {
+    .page_hero_content .btn {
+        padding: 10px 27px;
+        font-weight: 600;
+        font-size: 17px;
+    }
+    .section-heading .sec-title {
+
+        font-size: 26px;
+   
+    }
+    button.accordion-button {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 460px) {
+   
+}
