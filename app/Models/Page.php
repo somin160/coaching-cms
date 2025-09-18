@@ -17,18 +17,7 @@ class Page extends Model
         'sections',
         'status',
     ];
-  public function parent(): BelongsTo
-    {
-        return $this->belongsTo(Category::class, 'parent_id');
-    }
 
-    /**
-     * Yeh function child categories ke saath relationship banata hai (optional but good practice)
-     */
-    public function children(): HasMany
-    {
-        return $this->hasMany(Category::class, 'parent_id');
-    }
    protected $casts = [
     'sections' => 'array',
     'main_category_type' => 'string',

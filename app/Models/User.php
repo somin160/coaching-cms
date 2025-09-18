@@ -22,7 +22,7 @@ class User extends Authenticatable implements FilamentUser
             'password' => 'hashed',
         ];
     }
-    
+
     public function canAccessPanel(Panel $panel): bool
     {
         // For now, this allows any logged-in user to access the panel.

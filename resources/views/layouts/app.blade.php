@@ -20,7 +20,7 @@
     <div class="container mt-4">
         @yield('content')
     </div>
-
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

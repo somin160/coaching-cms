@@ -6,12 +6,9 @@
     <title>{{ $page->title }}</title>
 
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
-
     <link rel="stylesheet" href="{{ asset('assets/css/owl.carousel.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/jquery.fancybox.css') }}">
-
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-
     <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
 </head>
 <body>
@@ -70,15 +67,15 @@
                                     <div class="section-title text-center mb-4">
                                         <h2>Frequently Asked Questions</h2>
                                     </div>
-                                    <div class="accordion" id="faqAccordion">
+                                    <div class="accordion" id="faqAccordion-{{ $loop->index }}">
                                         @foreach($section['items'] ?? [] as $index => $faq)
                                             <div class="accordion-item">
-                                                <h2 class="accordion-header" id="heading{{ $index }}">
-                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="false" aria-controls="collapse{{ $index }}">
+                                                <h2 class="accordion-header" id="heading-{{ $loop->parent->index }}-{{ $index }}">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $loop->parent->index }}-{{ $index }}" aria-expanded="false">
                                                         {{ $faq['question'] }}
                                                     </button>
                                                 </h2>
-                                                <div id="collapse{{ $index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ $index }}" data-bs-parent="#faqAccordion">
+                                                <div id="collapse-{{ $loop->parent->index }}-{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion-{{ $loop->index }}">
                                                     <div class="accordion-body">
                                                         {{ $faq['answer'] }}
                                                     </div>
@@ -90,16 +87,37 @@
                             </div>
                         </div>
                     </section>
+                    @break
 
-                     @case('TextEditor')
-                   <section class="py-5">
-                       <div class="container">
-                          <div class="prose max-w-none">
-                              {!! $section['content'] ?? '' !!}
-                          </div>
-                       </div>
-                  </section>
-                  @break
+                @case('Carousel')
+                    <section class="slider_section py-5">
+                        <div class="container">
+                            <div class="owl-carousel owl-theme">
+                                @foreach($section['slides'] ?? [] as $slide)
+                                    <div class="item">
+                                        <img src="{{ asset('storage/' . $slide['image']) }}" alt="{{ $slide['caption'] ?? '' }}">
+                                        @if(!empty($slide['caption']))
+                                            <div class="carousel-caption d-none d-md-block">
+                                                <p>{{ $slide['caption'] }}</p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </section>
+                    @break
+
+                @case('TextEditor')
+                    <section class="py-5">
+                        <div class="container">
+                            <div class="content-area">
+                                {!! $section['content'] ?? '' !!}
+                            </div>
+                        </div>
+                    </section>
+                    @break
+
             @endswitch
         @endforeach
     @endif
@@ -115,8 +133,25 @@
         @endif
     @endauth
 
-
-    {{-- Required JavaScript for Bootstrap components like the accordion --}}
+    <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/js/owl.carousel.min.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.fancybox.min.js') }}"></script>
+    <script>
+        // Initialize Owl Carousel
+        $(document).ready(function(){
+            $('.owl-carousel').owlCarousel({
+                loop:true,
+                margin:10,
+                nav:true,
+                responsive:{
+                    0:{ items:1 },
+                    600:{ items:2 },
+                    1000:{ items:3 }
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>

@@ -26,8 +26,11 @@ public function boot(): void
 {
     \Filament\Facades\Filament::serving(function (ServingFilament $event) {
         FilamentAsset::register([
-            new Js('https://cdn.ckeditor.com/ckeditor5/39.0.1/super-build/ckeditor.js'),
+             Js::make(
+                'ck-editor','https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js'
+             ),
         ]);
     });
 }
+
 }

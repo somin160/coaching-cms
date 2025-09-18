@@ -18,9 +18,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\MarkdownEditor;
 use Illuminate\Support\Str;
-use Filament\Forms\Components\Field;
 
 class PageResource extends Resource
 {
@@ -31,7 +29,6 @@ class PageResource extends Resource
     {
         return $form
             ->schema([
-
                 // The layout is the same single column you wanted.
                 Select::make('page_type')
                     ->options([
@@ -58,7 +55,7 @@ class PageResource extends Resource
                 Select::make('category_id')
                     ->label('Category')
                     ->options(function () {
-                        // This logic already correctly shows the parent category.
+                        // This logic correctly shows the parent category, as you wanted.
                         return Category::with('parent')->get()->mapWithKeys(function ($category) {
                             $label = $category->parent
                                 ? $category->parent->name . ' -> ' . $category->name
@@ -118,7 +115,6 @@ class PageResource extends Resource
                                     ]),
                                 ],
                                 'TextEditor' => [
-                                    // THIS IS THE NEW, BETTER EDITOR
                                     Ckeditor::make('content')
                                         ->required()
                                         ->columnSpanFull(),
@@ -130,26 +126,25 @@ class PageResource extends Resource
     }
 
     public static function table(Table $table): Table
-{
-    return $table
-        ->columns([
-            Tables\Columns\TextColumn::make('id')->sortable(),
-            Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('page_type'),
-            Tables\Columns\TextColumn::make('category.type')->label('Main Category'),
-            Tables\Columns\TextColumn::make('category.name')->label('Sub Category'),
-            Tables\Columns\IconColumn::make('status')->boolean(),
-            Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable(),
-        ])
-        ->actions([
-            Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make(),
-        ])
-        ->bulkActions([
-            Tables\Actions\DeleteBulkAction::make(),
-        ]);
-}
-
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('page_type'),
+                Tables\Columns\TextColumn::make('category.name')->label('Category'),
+                Tables\Columns\IconColumn::make('status')->boolean(),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
 
     public static function getPages(): array
     {
